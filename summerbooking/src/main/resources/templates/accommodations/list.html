@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="hr">
+<head>
+    <nav style="
+    display:flex;
+    justify-content:space-between;
+    padding:20px 40px;
+    color:white;
+">
+
+        <div>Summer Booking</div>
+
+        <div style="display:flex; gap:20px;">
+
+            <a th:href="@{/}"
+               style="color:white;">Početna</a>
+
+            <a th:href="@{/accommodations}"
+               style="color:white;">Smještaji</a>
+
+
+        </div>
+
+    </nav>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smještaji</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg,
+                #ddf0fa 0%,
+                #b8dff5 28%,
+                #7ec8e8 52%,
+                #4aadd4 68%,
+                #2190bc 82%,
+                #1378a0 100%
+            );
+            background-attachment: fixed;
+        }
+
+        /* === SEA === */
+        .sea {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 46%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .sea::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                rgba(18,100,145,0) 0%,
+                rgba(10,70,110,0.45) 60%,
+                rgba(5,45,80,0.7) 100%
+            );
+        }
+
+        .sea::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 60%;
+            height: 30%;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%,100% { opacity: 0.6; transform: scaleX(1); }
+            50%      { opacity: 1;   transform: scaleX(1.15); }
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            left: 0;
+        }
+
+        .w1 { top: -2px; animation: wm 7s  linear infinite;         opacity: 0.55; }
+        .w2 { top: 18%;  animation: wm 11s linear infinite reverse;  opacity: 0.35; }
+        .w3 { top: 34%;  animation: wm 9s  linear infinite 2s;       opacity: 0.25; }
+        .w4 { top: 54%;  animation: wm 14s linear infinite reverse;   opacity: 0.2;  }
+
+        @keyframes wm {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+
+        /* === PAGE LAYOUT === */
+        .page {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 32px 120px;
+        }
+
+        /* === HEADER === */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: appear 0.6s ease forwards 0.1s;
+        }
+
+        .page-header-left .eyebrow {
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(10, 60, 100, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .page-header-left h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 42px;
+            font-weight: 400;
+            color: #0b3f60;
+            line-height: 1;
+        }
+
+        .page-header-left h1 em {
+            font-style: italic;
+            color: #1578a0;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 26px;
+            background: #0b3f60;
+            border-radius: 40px;
+            color: #ceeaf6;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 0.4px;
+            transition: background 0.3s, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover { background: #1578a0; transform: translateY(-1px); }
+
+        /* === TABLE CARD === */
+        .card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.7);
+            overflow: hidden;
+            opacity: 0;
+            animation: appear 0.6s ease forwards 0.25s;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 1px solid rgba(11, 63, 96, 0.1);
+        }
+
+        thead th {
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(10, 60, 100, 0.5);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(11, 63, 96, 0.07);
+            transition: background 0.2s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        tbody td {
+            padding: 16px 24px;
+            font-size: 14px;
+            font-weight: 300;
+            color: #0b3f60;
+        }
+
+        .td-name {
+            font-weight: 400;
+            color: #0b3f60;
+        }
+
+        .td-location {
+            color: rgba(11, 63, 96, 0.65);
+        }
+
+        .td-price {
+            font-family: 'DM Serif Display', serif;
+            font-size: 15px;
+            color: #1578a0;
+        }
+
+        .td-price::after {
+            content: ' €/noć';
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 300;
+            color: rgba(11,63,96,0.45);
+        }
+
+        /* === ACTION LINKS === */
+        .actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .action-link {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 400;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .action-details {
+            color: #1578a0;
+            background: rgba(21,120,160,0.1);
+        }
+        .action-details:hover { background: rgba(21,120,160,0.2); }
+
+        .action-edit {
+            color: rgba(11,63,96,0.6);
+            background: rgba(11,63,96,0.07);
+        }
+        .action-edit:hover { background: rgba(11,63,96,0.14); }
+
+        .action-delete {
+            color: rgba(180,60,60,0.7);
+            background: rgba(180,60,60,0.07);
+        }
+        .action-delete:hover { background: rgba(180,60,60,0.15); color: rgba(180,60,60,0.9); }
+
+        /* === EMPTY STATE === */
+        .empty {
+            text-align: center;
+            padding: 60px 24px;
+            color: rgba(11, 63, 96, 0.45);
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        /* === BACK LINK === */
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            color: rgba(11,63,96,0.5);
+            text-decoration: none;
+            margin-bottom: 28px;
+            transition: color 0.2s;
+            opacity: 0;
+            animation: appear 0.6s ease forwards 0s;
+        }
+
+        .back:hover { color: #1578a0; }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sea">
+    <svg class="wave w1" viewBox="0 0 1440 55" preserveAspectRatio="none">
+        <path d="M0,28 C200,8 400,48 600,28 C800,8 1000,48 1200,28 C1320,14 1380,36 1440,28 L1440,55 L0,55 Z" fill="rgba(255,255,255,0.55)"/>
+    </svg>
+    <svg class="wave w2" viewBox="0 0 1440 50" preserveAspectRatio="none">
+        <path d="M0,25 C240,10 480,40 720,25 C960,10 1200,40 1440,25 L1440,50 L0,50 Z" fill="rgba(255,255,255,0.3)"/>
+    </svg>
+    <svg class="wave w3" viewBox="0 0 1440 50" preserveAspectRatio="none">
+        <path d="M0,25 C180,38 360,12 540,25 C720,38 900,12 1080,25 C1260,38 1360,18 1440,25 L1440,50 L0,50 Z" fill="rgba(255,255,255,0.22)"/>
+    </svg>
+    <svg class="wave w4" viewBox="0 0 1440 50" preserveAspectRatio="none">
+        <path d="M0,25 C300,14 600,36 900,25 C1200,14 1320,34 1440,25 L1440,50 L0,50 Z" fill="rgba(180,225,248,0.18)"/>
+    </svg>
+</div>
+
+<div class="page">
+
+    <a th:href="@{/}" href="/" class="back">
+        ← Natrag
+    </a>
+
+    <div class="page-header">
+        <div class="page-header-left">
+            <p class="eyebrow">Istra &bull; Hrvatska</p>
+            <h1>Svi <em>smještaji</em></h1>
+        </div>
+        <a th:href="@{/accommodations/new}" href="/accommodations/new" class="btn-add">
+            + Dodaj smještaj
+        </a>
+    </div>
+    <form th:action="@{/accommodations/search}"
+          method="get"
+          style="margin-bottom:20px; display:flex; gap:10px;">
+
+        <input type="text"
+               name="keyword"
+               placeholder="Pretraži smještaj..."
+               style="
+                padding:10px 14px;
+                border-radius:30px;
+                border:none;
+                width:250px;
+                outline:none;
+           ">
+
+        <button type="submit"
+                class="btn-add"
+                style="border:none;">
+            Pretraži
+        </button>
+
+    </form>
+    <div class="card">
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+
+            <a th:href="@{/accommodations/sort(direction='asc')}"
+               class="btn-add">
+                Najjeftinije
+            </a>
+
+            <a th:href="@{/accommodations/sort(direction='desc')}"
+               class="btn-add">
+                Najskuplje
+            </a>
+
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Naziv</th>
+                <th>Lokacija</th>
+                <th>Cijena</th>
+                <th>Akcije</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="a : ${accommodations}">
+                <td class="td-name" th:text="${a.name}">Apartman Sunce</td>
+                <td class="td-location" th:text="${a.location}">Hvar</td>
+                <td class="td-price" th:text="${a.pricePerNight}">120</td>
+                <td>
+                    <div class="actions">
+                        <a th:href="@{/accommodations/{id}(id=${a.id})}"
+                           href="#" class="action-link action-details">Detalji</a>
+                        <a th:href="@{/accommodations/edit/{id}(id=${a.id})}"
+                           href="#" class="action-link action-edit">Uredi</a>
+                        <a th:href="@{/accommodations/delete/{id}(id=${a.id})}"
+                           onclick="return confirm('Obrisati smještaj?')"
+                           href="#" class="action-link action-delete">Obriši</a>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(accommodations)}">
+                <td colspan="4" class="empty">Nema dostupnih smještaja.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
