@@ -79,10 +79,5 @@ SummerBookingApplication
 http://localhost:8080
 ```
 
-## Autor
+Projekt je izrađen u sklopu kolegija Programiranje na Java virtualnom stroju.
 
-Projekt izrađen kao završni projekt iz kolegija Programiranje u Javi.
-
-## Napomena
-
-Projekt koristi stvarnu MySQL bazu podataka te implementira CRUD operacije, validaciju unosa i pretragu podataka kroz web sučelje.
